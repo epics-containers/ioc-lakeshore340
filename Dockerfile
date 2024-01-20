@@ -24,6 +24,18 @@ COPY ibek-support/_global/ _global
 COPY ibek-support/iocStats/ iocStats
 RUN iocStats/install.sh 3.1.16
 
+COPY ibek-support/autosave/ autosave/
+RUN autosave/install.sh R5-11
+
+COPY ibek-support/calc/ calc/
+RUN calc/install.sh R3-7-5
+
+COPY ibek-support/StreamDevice/ StreamDevice/
+RUN StreamDevice/install.sh 2.8.24
+
+COPY ibek-support/lakeshore340/ lakeshore340/
+RUN lakeshore340/install.sh 2-6
+
 ################################################################################
 #  TODO - Add futher support module installations here
 ################################################################################
