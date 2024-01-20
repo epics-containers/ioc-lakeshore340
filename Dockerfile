@@ -27,12 +27,6 @@ RUN iocStats/install.sh 3.1.16
 COPY ibek-support/autosave/ autosave/
 RUN autosave/install.sh R5-11
 
-COPY ibek-support/sscan/ sscan/
-RUN sscan/install.sh R2-11-6
-
-COPY ibek-support/calc/ calc/
-RUN calc/install.sh R3-7-5
-
 COPY ibek-support/asyn/ asyn/
 RUN asyn/install.sh R4-42
 
