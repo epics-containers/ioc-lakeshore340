@@ -33,6 +33,9 @@ RUN sscan/install.sh R2-11-6
 COPY ibek-support/calc/ calc/
 RUN calc/install.sh R3-7-5
 
+COPY ibek-support/asyn/ asyn/
+RUN asyn/install.sh R4-42
+
 COPY ibek-support/StreamDevice/ StreamDevice/
 RUN StreamDevice/install.sh 2.8.24
 
