@@ -10,17 +10,18 @@ entities:
 
   - type: asyn.AsynIP
     name: p1
-    port: 127.0.0.1:5400
+    port: 127.0.0.1:5401
+    disconnectOnReadTimeout: "N"
 
   - type: lakeshore340.lakeshore340
     ADDR: 12
-    LOOP: 1
+    LOOP: 2
     P: BL16I-EA-LS340-01
     PORT: p1
     SCAN: 5
-    TEMPSCAN: 1
+    TEMPSCAN: 2
     name: lakeshore
 
-  - type: epics.dbpf
-    pv: BL16I-EA-LS340-01:DISABLE
-    value: "1"
+  # - type: epics.dbpf
+  #   pv: BL16I-EA-LS340-01:DISABLE
+  #   value: "0"
