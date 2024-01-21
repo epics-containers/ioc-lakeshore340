@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<components arch="linux-x86_64">
+	<devIocStats.devIocStatsHelper ioc="BL16I-EA-IOC-07" name="STATS"/>
+	<asyn.AsynIP name="p1" port="127.0.0.1:5400"/>
+	<lakeshore340.lakeshore340 ADDR="12" LOOP="1" P="BL16I-EA-LS340-01" PORT="p1" SCAN="5" TEMPSCAN="1" gda_desc="Lakeshore 340 Temperature Controller" gda_name="LS340b" name="lakeshore"/>
+	<EPICS_BASE.dbpf name="d1" pv="BL16I-EA-LS340-01:DISABLE" value="1"/>
+</components>
