@@ -19,9 +19,11 @@ jobs:
         architecture: [linux]
         include:
           - os: ubuntu-latest
-            platform: linux/amd64
+            platforms: linux/amd64
 
     runs-on: ${{ matrix.os }}
+    env:
+      TAG: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-${{ matrix.architecture }}-${{ matrix.target }}:${{ github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,14 +44,27 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
-          push: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
-          platform: ${{ matrix.platform }}
+          platforms: ${{ matrix.platforms }}
           target: ${{ matrix.target }}
           build-args: TARGET_ARCHITECTURE=${{ matrix.architecture }}
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-${{ matrix.architecture }}-${{ matrix.target }}:${{ github.ref_name }}
+          tags: ${{ env.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+
+      - name: Test image
+        run: tests/run-tests.sh
+
+      - name: Push image
+        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ matrix.platforms }}
+          target: ${{ matrix.target }}
+          build-args: TARGET_ARCHITECTURE=${{ matrix.architecture }}
+          tags: ${{ env.TAG }}
+          push: true
 
   release:
     # Release on tag push - publish ioc schema
@@ -65,8 +80,6 @@ jobs:
       - name: generate-schema
         run: |
           ibek ioc generate-schema --output ibek.ioc.schema.json
-
-      # TODO add back in some tests that run INSIDE the container
 
       - name: Github Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v0.1.15

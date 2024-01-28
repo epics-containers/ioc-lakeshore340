@@ -6,10 +6,10 @@
 # This will run inside the devcontainer after creation                         #
 ################################################################################
 
-apt-get update
-apt-get -y --no-install-recommends install vimdiff
+# apt-get update
+# apt-get -y --no-install-recommends install vimdiff
 # apt-get install what you like
 
-# add some completion
+# add command line completion to the ibek tool
 ibek --install-completion bash
 
