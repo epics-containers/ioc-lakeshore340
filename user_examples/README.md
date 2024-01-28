@@ -1,7 +1,7 @@
 User Customization Examples
 ===========================
 
-Users can customize their epics-containers developer containers by creating
+Users can customize their epics-containers developer containers by copying
 the files in this folder into their home directory and customizing them as
 required.
 
