@@ -1,0 +1,9 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 3.4.0b4
+_src_path: gh:epics-containers/ioc-template
+description: Generic IOC for the lakeshore 340 temperature controller
+git_platform: github.com
+github_org: epics-containers
+name: ioc-lakeshor340
+repo_uri: git@github.com:epics-containers/ioc-lakeshor340.git
+rtems: true
