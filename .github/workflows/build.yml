@@ -30,7 +30,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     outputs:
-      meta-developer: ${{ steps.meta-developer.outputs.tags }}
+      developer-tag: ${{ steps.meta-developer.outputs.tags }}
 
     steps:
       - name: Checkout
@@ -121,9 +121,13 @@ jobs:
 
     # this job runs in the native developer container we just made
     container:
-      image: ${{ needs.build.outputs.meta-developer-tags }}
+      image: ${{ needs.build.outputs.developer-tag }}
 
     steps:
+      - name: report container tag name
+        run: |
+          echo developer container image tag is ${{ needs.build.outputs.developer-tag }}
+
       - name: generate-schema
         run: |
           ibek ioc generate-schema --output ibek.ioc.schema.json
