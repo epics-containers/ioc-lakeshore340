@@ -67,6 +67,17 @@ description='
 
 '
 
+# log commands and stop on errors
+set -xe
+
+# wrap this script in stdio-expose if running in Kubernetes
+# this allows the IOC to expose its console on a Unix socket
+if [[ -n ${KUBERNETES_PORT} && -z ${STDIO_EXPOSED} ]]; then
+    STDIO_EXPOSED=YES stdio-expose ${IOC}/start.sh
+    exit 0
+fi
+
+
 # error reporting *************************************************************
 
 function ibek_error {
@@ -78,8 +89,6 @@ function ibek_error {
 
 # environment setup ************************************************************
 
-# log commands and stop on errors
-set -xe
 
 cd ${IOC}
 CONFIG_DIR=${IOC}/config
@@ -130,7 +139,13 @@ elif [ -f ${ibek_src} ]; then
 
     # get the ibek support yaml files this ioc's support modules
     defs=/epics/ibek-defs/*.ibek.support.yaml
+    # prepare the runtime assets: ioc.db, st.cmd + protocol, autosave files
     ibek runtime generate ${ibek_src} ${defs}
+    ibek runtime generate-autosave
+    if [[ -d /epics/support/configure/protocol ]] ; then
+        rm -fr ${RUNTIME_DIR}/protocol
+        cp -r /epics/support/configure/protocol  ${RUNTIME_DIR}
+    fi
 
     # build expanded database using msi
     if [ -f ${db_src} ]; then
@@ -145,6 +160,7 @@ elif [ -f ${ioc_startup} ] ; then
         # generate ioc.db from ioc.subst, including all templates from SUPPORT
         includes=$(for i in ${SUPPORT}/*/db; do echo -n "-I $i "; done)
         msi ${includes} -I${RUNTIME_DIR} -S ${CONFIG_DIR}/ioc.subst -o ${epics_db}
+        ibek runtime generate-autosave
     fi
     final_ioc_startup=${ioc_startup}
 # 4. incorrect config folder ***************************************************
@@ -170,8 +186,8 @@ else
     else
         # the RTEMS container provides a python package to:
         # - copy binaries to the IOC's shared folder
-        # - remotely configure the boot parameters
         # - remotely launch the IOC
+        # - can also remotely configure the boot parameters
         rtems-proxy start
     fi
 fi

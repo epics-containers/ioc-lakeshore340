@@ -1,6 +1,6 @@
 ARG IMAGE_EXT
 
-ARG BASE=7.0.9ec1
+ARG BASE=7.0.9ec4
 ARG REGISTRY=ghcr.io/epics-containers
 ARG RUNTIME=${REGISTRY}/epics-base${IMAGE_EXT}-runtime:${BASE}
 ARG DEVELOPER=${REGISTRY}/epics-base${IMAGE_EXT}-developer:${BASE}
@@ -16,18 +16,24 @@ RUN ln -s ${SOURCE_FOLDER}/ioc ${IOC}
 
 # Get the current version of ibek
 COPY requirements.txt requirements.txt
-RUN pip install --upgrade -r requirements.txt
+RUN uv pip install --upgrade -r requirements.txt
 
 WORKDIR ${SOURCE_FOLDER}/ibek-support
 
-# copy the global ibek files
-COPY ibek-support/_global/ _global
+COPY ibek-support/_ansible _ansible
+ENV PATH=$PATH:${SOURCE_FOLDER}/ibek-support/_ansible
 
 COPY ibek-support/iocStats/ iocStats
 RUN ansible.sh iocStats
 
 COPY ibek-support/asyn/ asyn/
 RUN ansible.sh asyn
+
+COPY ibek-support/pvlogging/ pvlogging/
+RUN ansible.sh pvlogging
+
+COPY ibek-support/autosave/ autosave
+RUN ansible.sh autosave
 
 COPY ibek-support/StreamDevice/ StreamDevice/
 RUN ansible.sh StreamDevice
@@ -37,16 +43,14 @@ RUN ansible.sh lakeshore340
 
 # get the ioc source and build it
 COPY ioc ${SOURCE_FOLDER}/ioc
-RUN cd ${IOC} && ./install.sh && make
-
-# install runtime proxy for non-native builds
-RUN bash ${IOC}/install_proxy.sh
+RUN ansible.sh ioc
 
 ##### runtime preparation stage ################################################
 FROM developer AS runtime_prep
 
 # get the products from the build stage and reduce to runtime assets only
-RUN ibek ioc extract-runtime-assets /assets
+# TODO /python is created by uv - add to apt-install-runtime-packages' defaults
+RUN ibek ioc extract-runtime-assets /assets /python
 
 ##### runtime stage ############################################################
 FROM ${RUNTIME} AS runtime
@@ -55,6 +59,7 @@ FROM ${RUNTIME} AS runtime
 COPY --from=runtime_prep /assets /
 
 # install runtime system dependencies, collected from install.sh scripts
-RUN ibek support apt-install-runtime-packages --skip-non-native
+RUN ibek support apt-install-runtime-packages
 
+# launch the startup script with stdio-expose to allow console connections
 CMD ["bash", "-c", "${IOC}/start.sh"]
